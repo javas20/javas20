@@ -1,0 +1,67 @@
+#define ENA 25  // Enable pin untuk motor kiri
+#define IN1 12  // IN1 untuk motor kiri
+#define IN2 13  // IN2 untuk motor kiri
+
+#define ENB 26  // Enable pin untuk motor kanan
+#define IN3 14  // IN3 untuk motor kanan
+#define IN4 15  // IN4 untuk motor kanan
+
+void setup() {
+  Serial.begin(115200);
+
+  // Set pin sebagai output
+  pinMode(ENA, OUTPUT);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(ENB, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+
+  // Inisialisasi PWM
+  ledcSetup(0, 1000, 8); // Channel 0, frekuensi 1kHz, resolusi 8-bit
+  ledcAttachPin(ENA, 0);
+
+  ledcSetup(1, 1000, 8); // Channel 1, frekuensi 1kHz, resolusi 8-bit
+  ledcAttachPin(ENB, 1);
+}
+
+void loop() {
+  if (Serial.available()) {
+    String command = Serial.readStringUntil('\n');
+    command.trim();
+
+    if (command == "FORWARD") {
+      // Maju
+      digitalWrite(IN1, HIGH);
+      digitalWrite(IN2, LOW);
+      digitalWrite(IN3, HIGH);
+      digitalWrite(IN4, LOW);
+      ledcWrite(0, 200); // Kecepatan motor kiri
+      ledcWrite(1, 200); // Kecepatan motor kanan
+    } else if (command == "LEFT") {
+      // Belok kiri
+      digitalWrite(IN1, LOW);
+      digitalWrite(IN2, LOW);
+      digitalWrite(IN3, HIGH);
+      digitalWrite(IN4, LOW);
+      ledcWrite(0, 0);   // Motor kiri berhenti
+      ledcWrite(1, 150); // Kecepatan motor kanan
+    } else if (command == "RIGHT") {
+      // Belok kanan
+      digitalWrite(IN1, HIGH);
+      digitalWrite(IN2, LOW);
+      digitalWrite(IN3, LOW);
+      digitalWrite(IN4, LOW);
+      ledcWrite(0, 150); // Kecepatan motor kiri
+      ledcWrite(1, 0);   // Motor kanan berhenti
+    } else {
+      // Berhenti
+      digitalWrite(IN1, LOW);
+      digitalWrite(IN2, LOW);
+      digitalWrite(IN3, LOW);
+      digitalWrite(IN4, LOW);
+      ledcWrite(0, 0);
+      ledcWrite(1, 0);
+    }
+  }
+}
